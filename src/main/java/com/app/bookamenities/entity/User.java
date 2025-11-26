@@ -1,16 +1,16 @@
 package com.app.bookamenities.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.time.LocalDateTime;
+import java.util.Date;
 
 
 @Data
@@ -22,7 +22,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int userId;
+    private Long userId;
 
     @NotBlank(message = "Username is required field")
     private String username;
@@ -39,5 +39,9 @@ public class User {
     @NotBlank(message = "Mobile number is required field")
     @Pattern(regexp = "^[6-9]\\d{9}$", message="Invalid Mobile number")
     private String mobile;
+
+    @CreatedDate
+    @Column(updatable = false, nullable = false)
+    private Date createdDate;
 
 }

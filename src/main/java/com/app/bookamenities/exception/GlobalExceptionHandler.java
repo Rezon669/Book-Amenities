@@ -27,9 +27,7 @@ public class GlobalExceptionHandler {
             String message = ex.getFieldError().getDefaultMessage();
 
             fieldErrors.put(fieldName, message);
-                }
-
-        );
+        });
 
         response.put("details", fieldErrors);
 

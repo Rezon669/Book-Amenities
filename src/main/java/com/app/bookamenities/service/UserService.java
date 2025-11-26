@@ -5,18 +5,22 @@ import com.app.bookamenities.exception.CustomException;
 import com.app.bookamenities.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.CurrentTimestamp;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.Optional;
 
 @Slf4j
 @Service
 public class UserService {
 
-    private final UserRepository userRepo;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    UserService(UserRepository userRepo, PasswordEncoder passwordEncoder){
-        this.userRepo = userRepo;
+    UserService(UserRepository userRepository, PasswordEncoder passwordEncoder){
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -24,13 +28,14 @@ public class UserService {
     public void addUser(@Valid User user) {
 
         log.info("Adding the user: {}", user);
-        User existingUser = userRepo.findByUsername(user.getUsername());
-        if (existingUser != null) {
+        Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
+        if (existingUser.isPresent()) {
             throw new CustomException("Username already in use, try with another one");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepo.save(user);
-        log.info("Successfully added the user: {}", user);
+        user.setCreatedDate(new Date());
+        userRepository.save(user);
+        log.info("Successfully added the user: {}", user.getUsername());
 
     }
 }

@@ -6,19 +6,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findByUserIdAndBookingDate(Long userId, String bookingDate);
+    List<Booking> findByUserIdAndBookingDate(Long userId, LocalDate bookingDate);
 
-    List<Booking> findByBookingDateAndAmenityName(String date, String amenityName);
+    List<Booking> findByBookingDateAndAmenityName(LocalDate bookingDate, String amenityName);
 
     @Query("SELECT b FROM Booking b WHERE b.userId = :userId AND b.bookingDate < :today ORDER BY b.bookingDate DESC")
-    List<Booking> findPastBookings(@Param("userId") Long userId, @Param("today") String today);
+    List<Booking> findPastBookings(@Param("userId") Long userId, @Param("today") LocalDate today);
 
     @Query("SELECT b FROM Booking b WHERE b.userId = :userId AND b.bookingDate >= :today ORDER BY b.bookingDate ASC")
-    List<Booking> findUpcomingBookings(@Param("userId") Long userId, @Param("today") String today);
+    List<Booking> findUpcomingBookings(@Param("userId") Long userId, @Param("today") LocalDate today);
 
 
 }

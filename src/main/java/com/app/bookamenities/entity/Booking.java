@@ -1,5 +1,6 @@
 package com.app.bookamenities.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,7 @@ import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.time.LocalTime;
 
 @Entity
 @Data
@@ -28,14 +29,14 @@ public class Booking {
     @NotBlank
     private String amenityName;
 
-    @NotBlank
-    private String bookingDate;
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDate bookingDate;
 
-    @NotBlank
-    private String fromTime;
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime startTime;
 
-    @NotBlank
-    private String toTime;
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime endTime;
 
     @CreatedDate
     @Column(updatable = false)

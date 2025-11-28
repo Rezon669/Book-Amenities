@@ -17,8 +17,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -36,16 +34,38 @@ public class BookingService {
     }
     public Booking bookSlot(BookingRequest request) {
 
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        LocalDate bookingDate = LocalDate.parse(request.getDate(), dateFormatter);
+        validateBookingDetails(request);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-        LocalTime startTime = LocalTime.parse(request.getStartTime(), formatter);
-        LocalTime endTime = LocalTime.parse(request.getEndTime(), formatter);
+        Booking booking = new Booking();
+        booking.setUserId(request.getUserId());
+        booking.setAmenityName(request.getAmenityName());
+        booking.setStartTime(request.getStartTime());
+        booking.setEndTime(request.getEndTime());
+        booking.setBookingDate(request.getBookingDate());
+        booking.setCreatedDate(LocalDateTime.now());
 
-        LocalDate today = LocalDate.now();
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new CustomException("User not found"));
 
-        List<Booking> userBookings = bookingRepository.findByUserIdAndBookingDate(request.getUserId(), request.getDate());
+        Booking savedBooking = bookingRepository.save(booking);
+
+        String message =
+                "Hi " + user.getFirstName()+",\n" +
+                        "Booking Confirmed!\n" +
+                        "Booking ID: " + savedBooking.getBookingId() + "\n" +
+                        "Amenity: " + request.getAmenityName() + "\n" +
+                        "Date: " + request.getBookingDate() + "\n" +
+                        "From: " + request.getStartTime() + "\n" +
+                        "To: " + request.getEndTime();
+
+     //   sendSms(user.getMobile(), message);
+
+        return savedBooking;
+    }
+
+    public void validateBookingDetails(BookingRequest request){
+
+        List<Booking> userBookings = bookingRepository.findByUserIdAndBookingDate(request.getUserId(), request.getBookingDate());
 
         for (Booking b : userBookings) {
 
@@ -53,11 +73,8 @@ public class BookingService {
                 throw new CustomException("You can book this amenity only once per day");
             }
 
-            LocalTime existingFrom = LocalTime.parse(b.getFromTime(), formatter);
-            LocalTime existingTo = LocalTime.parse(b.getToTime(), formatter);
-
             boolean isOverlapping =
-                    (startTime.isBefore(existingTo) && endTime.isAfter(existingFrom));
+                    (request.getStartTime().isBefore(b.getEndTime()) && request.getEndTime().isAfter(b.getStartTime()));
 
             if (isOverlapping) {
                 throw new CustomException(
@@ -66,21 +83,21 @@ public class BookingService {
             }
         }
 
-        if (bookingDate.isBefore(today)) {
+        if (request.getBookingDate().isBefore(LocalDate.now())) {
             throw new CustomException("Booking date cannot be in the past");
         }
 
-        if (bookingDate.isEqual(today)) {
-            if (startTime.isBefore(LocalTime.now())) {
+        if (request.getBookingDate().isEqual(LocalDate.now())) {
+            if (request.getStartTime().isBefore(LocalTime.now())) {
                 throw new CustomException("Start time cannot be before current time");
             }
         }
 
-        if (endTime.isBefore(startTime)) {
+        if (request.getEndTime().isBefore(request.getStartTime())) {
             throw new CustomException("End time cannot be earlier than Start time");
         }
 
-        Duration duration = Duration.between(startTime, endTime);
+        Duration duration = Duration.between(request.getStartTime(), request.getEndTime());
         if (request.getAmenityName().equalsIgnoreCase("Convention Hall")) {
 
             if (duration.toHours() > 12) {
@@ -98,14 +115,14 @@ public class BookingService {
         }
 
         List<Booking> allBookingsForDate =
-                bookingRepository.findByBookingDateAndAmenityName(request.getDate(), request.getAmenityName());
+                bookingRepository.findByBookingDateAndAmenityName(request.getBookingDate(), request.getAmenityName());
 
         for (Booking b : allBookingsForDate) {
 
-            LocalTime existingFrom = LocalTime.parse(b.getFromTime(), formatter);
-            LocalTime existingTo = LocalTime.parse(b.getToTime(), formatter);
+            LocalTime existingFrom = b.getStartTime();
+            LocalTime existingTo = b.getEndTime();
 
-            boolean overlaps = (startTime.isBefore(existingTo) && endTime.isAfter(existingFrom));
+            boolean overlaps = (request.getStartTime().isBefore(existingTo) && request.getEndTime().isAfter(existingFrom));
 
             if (overlaps) {
                 throw new CustomException(
@@ -115,35 +132,6 @@ public class BookingService {
         }
 
         log.info("Booking details validation completed");
-
-        Booking booking = new Booking();
-        booking.setUserId(request.getUserId());
-        booking.setAmenityName(request.getAmenityName());
-        booking.setFromTime(request.getStartTime());
-        booking.setToTime(request.getEndTime());
-        booking.setBookingDate(request.getDate());
-        booking.setCreatedDate(LocalDateTime.now());
-
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new CustomException("User not found"));
-
-        Booking savedBooking = bookingRepository.save(booking);
-
-        String mobile = user.getMobile();
-
-        String message =
-                "Hi " + user.getFirstName()+",\n" +
-                        "Booking Confirmed!\n" +
-                        "Booking ID: " + savedBooking.getBookingId() + "\n" +
-                        "Amenity: " + request.getAmenityName() + "\n" +
-                        "Date: " + request.getDate() + "\n" +
-                        "From: " + request.getStartTime() + "\n" +
-                        "To: " + request.getEndTime();
-
-     //   sendSms(mobile, message);
-
-        return savedBooking;
-
     }
 
     public void sendSms(String phoneNumber, String message) {
@@ -159,16 +147,16 @@ public class BookingService {
     }
 
     public List<Booking> getPastBookings(Long userId) {
-        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        LocalDate today = LocalDate.now();
         return bookingRepository.findPastBookings(userId, today);
     }
 
     public List<Booking> getUpcomingBookings(Long userId) {
-        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        LocalDate today = LocalDate.now();
         return bookingRepository.findUpcomingBookings(userId, today);
     }
 
-    public String deleteBooking(Long bookingId, Long userId) {
+    public void deleteBooking(Long bookingId, Long userId) {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new CustomException("Booking not found"));
@@ -177,18 +165,12 @@ public class BookingService {
             throw new CustomException("You are not allowed to delete this booking");
         }
 
-        LocalDate bookingDate = LocalDate.parse(booking.getBookingDate(),
-                DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-
-        LocalDate today = LocalDate.now();
-
-        if (bookingDate.isBefore(today)) {
+        if (booking.getBookingDate().isBefore(LocalDate.now())) {
             throw new CustomException("Past bookings cannot be deleted");
         }
 
-        if (bookingDate.isEqual(today)) {
-            LocalTime startTime = LocalTime.parse(booking.getFromTime(),
-                    DateTimeFormatter.ofPattern("HH:mm"));
+        if (booking.getBookingDate().isEqual(LocalDate.now())) {
+            LocalTime startTime = booking.getStartTime();
 
             if (startTime.isBefore(LocalTime.now())) {
                 throw new CustomException("You cannot delete a booking that already started");
@@ -197,8 +179,26 @@ public class BookingService {
 
         bookingRepository.delete(booking);
 
-        return "Booking deleted successfully";
     }
+
+    public Booking updateBooking(Long bookingId, BookingRequest request) {
+
+        log.info("inside the update booking {}", request);
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new CustomException("Booking not found"));
+
+        validateBookingDetails(request);
+
+        // Apply updates
+        booking.setAmenityName(request.getAmenityName());
+        booking.setStartTime(request.getStartTime());
+        booking.setEndTime(request.getEndTime());
+        booking.setBookingDate(request.getBookingDate());
+
+        return bookingRepository.save(booking);
+    }
+
 
 
 }

@@ -45,6 +45,10 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-
-
+    @PutMapping("/{bookingId}")
+    public ResponseEntity<?> updateBooking(@PathVariable Long bookingId,
+                                           @RequestBody BookingRequest request) {
+        Booking updated = bookingService.updateBooking(bookingId, request);
+        return ResponseEntity.ok(updated);
+    }
 }

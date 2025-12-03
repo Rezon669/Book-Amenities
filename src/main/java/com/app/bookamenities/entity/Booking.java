@@ -32,6 +32,10 @@ public class Booking {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate bookingDate;
 
+    private String slot;
+
+    private String roomNumber;
+
     @JsonFormat(pattern = "HH:mm")
     private LocalTime startTime;
 

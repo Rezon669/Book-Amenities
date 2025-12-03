@@ -33,6 +33,12 @@ public class User {
     @NotBlank(message = "Last name is required field")
     private String lastName;
 
+    @NotBlank(message = "Flat number is a required field")
+    private String flatNumber;
+
+    @NotBlank
+    private String block;
+
     @NotBlank(message = "Password is required field")
     private String password;
 

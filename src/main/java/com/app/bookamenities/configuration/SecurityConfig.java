@@ -18,6 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.Collections;
 import java.util.List;
 
 @Configuration
@@ -35,7 +36,8 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     var config = new org.springframework.web.cors.CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:5173"));
+                    //config.setAllowedOrigins(List.of("http://localhost:5173"));
+                    config.setAllowedOrigins(Collections.singletonList("*"));
                     config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
                     config.setAllowedHeaders(List.of("*"));
                     config.setAllowCredentials(true);
@@ -45,34 +47,35 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(form -> form.disable())
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers("/book-amenities/login", "/book-amenities/user/**").permitAll()
+                        .requestMatchers("/", "/index.html", "/assets/**", "/static/**", "/images/**").permitAll()
+                        .requestMatchers("/book-amenities/login", "/book-amenities/user").permitAll()
                         .requestMatchers("/book-amenities/**").authenticated())
-                .exceptionHandling(ex -> ex
-                        .accessDeniedHandler(customAccessDeniedHandler())
-                        .authenticationEntryPoint(customAuthenticationEntryPoint()))
+//                .exceptionHandling(ex -> ex
+//                        .accessDeniedHandler(customAccessDeniedHandler())
+//                        .authenticationEntryPoint(customAuthenticationEntryPoint()))
                 .httpBasic(basic -> basic.disable())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    @Bean
-    public AuthenticationEntryPoint customAuthenticationEntryPoint() {
-        return (req, res, ex) -> {
-            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            res.setContentType("application/json");
-            res.getWriter().write("{\"error\": \"401 - Unauthorized: Please login again\"}");
-        };
-    }
-
-    @Bean
-    public AccessDeniedHandler customAccessDeniedHandler() {
-        return (req, res, ex) -> {
-            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            res.setContentType("application/json");
-            res.getWriter().write("{\"error\": \"403 - No Access: Please login again\"}");
-        };
-    }
+//    @Bean
+//    public AuthenticationEntryPoint customAuthenticationEntryPoint() {
+//        return (req, res, ex) -> {
+//            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            res.setContentType("application/json");
+//            res.getWriter().write("{\"error\": \"401 - Unauthorized: Please login again\"}");
+//        };
+//    }
+//
+//    @Bean
+//    public AccessDeniedHandler customAccessDeniedHandler() {
+//        return (req, res, ex) -> {
+//            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+//            res.setContentType("application/json");
+//            res.getWriter().write("{\"error\": \"403 - No Access: Please login again\"}");
+//        };
+//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -1,8 +1,10 @@
 package com.app.bookamenities.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,4 +53,25 @@ public class GlobalExceptionHandler {
         response.put("message", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(TransactionSystemException.class)
+    public ResponseEntity<Object> handleTransactionSystemException(TransactionSystemException ex) {
+        Throwable cause = ex.getRootCause();
+        if (cause instanceof ConstraintViolationException cve) {
+            Map<String, String> errors = new HashMap<>();
+            cve.getConstraintViolations().forEach(v -> {
+                errors.put(v.getPropertyPath().toString(), v.getMessage());
+            });
+
+            Map<String, Object> response = new HashMap<>();
+//            response.put("status", HttpStatus.BAD_REQUEST.value());
+//            response.put("message", "Validation failed");
+            response.put("details", errors);
+
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>("Unknown error", HttpStatus.BAD_REQUEST);
+    }
+
 }

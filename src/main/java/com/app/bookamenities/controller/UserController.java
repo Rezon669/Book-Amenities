@@ -37,4 +37,22 @@ public class UserController {
         BeanUtils.copyProperties(user, userResponse);
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable("userId") Long userId){
+
+        boolean deleted = userService.deleteUserDetails(userId);
+        Response response = new Response();
+
+        if (!deleted) {
+            System.out.println("insde the flase condition");
+            response.setStatuscode(HttpStatus.NOT_FOUND.value());
+            response.setMessage("User not found with ID: " + userId);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        response.setStatuscode(HttpStatus.OK.value());
+        response.setMessage("User record deleted successfully " + userId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

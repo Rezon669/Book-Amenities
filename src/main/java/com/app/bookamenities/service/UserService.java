@@ -3,13 +3,12 @@ package com.app.bookamenities.service;
 import com.app.bookamenities.dto.UserRequest;
 import com.app.bookamenities.entity.User;
 import com.app.bookamenities.exception.CustomException;
-import com.app.bookamenities.exception.ResourceNotFoundException;
+import com.app.bookamenities.repository.BookingRepository;
 import com.app.bookamenities.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.Date;
 import java.util.Optional;
 
@@ -19,6 +18,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
 
     UserService(UserRepository userRepository, PasswordEncoder passwordEncoder){
         this.userRepository = userRepository;
@@ -60,4 +60,18 @@ public class UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException("User not found with ID: " + userId));
     }
+
+    public boolean deleteUserDetails(Long userId) {
+        log.info("Checking is user exist with Id {}", userId);
+
+        if (!userRepository.existsById(userId)) {
+            log.info("Checking is user exist with Id {}", userId);
+            return false;
+        }
+        log.info("Deleting all the bookings based on userID {}", userId);
+        log.info("Deleting user with ID {}", userId);
+        userRepository.deleteById(userId);
+        return true;
+    }
+
 }

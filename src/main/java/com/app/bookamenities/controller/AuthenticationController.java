@@ -31,11 +31,8 @@ public class AuthenticationController {
             return ResponseEntity.badRequest()
                     .body("No token found in request");
         }
-
         String token = header.substring(7);
-
         authenticationService.logout(token);
-
         return ResponseEntity.ok("Logged out successfully");
     }
 }

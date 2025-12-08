@@ -40,7 +40,9 @@ public class BookingService {
         validateBookingDetails(request);
 
         Booking booking = new Booking();
-        booking.setUserId(request.getUserId());
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("No user record found with this Id"));
+        booking.setUser(user);
         booking.setAmenityName(request.getAmenityName());
         booking.setStartTime(request.getStartTime());
         booking.setEndTime(request.getEndTime());
@@ -49,8 +51,8 @@ public class BookingService {
         booking.setBookingDate(request.getBookingDate());
         booking.setCreatedDate(LocalDateTime.now());
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new CustomException("User not found"));
+//        User user = userRepository.findById(request.getUserId())
+//                .orElseThrow(() -> new CustomException("User not found"));
 
         log.info("Creating a booking slot");
 
@@ -72,7 +74,7 @@ public class BookingService {
 
     public void validateBookingDetails(BookingRequest request){
 
-        List<Booking> userBookings = bookingRepository.findByUserIdAndBookingDate(request.getUserId(), request.getBookingDate());
+        List<Booking> userBookings = bookingRepository.findByUser_UserIdAndBookingDate(request.getUserId(), request.getBookingDate());
 
         if(request.getAmenityName().equalsIgnoreCase("Guest Rooms")) {
             if (request.getSlot().equalsIgnoreCase("Morning")) {
@@ -252,7 +254,7 @@ public class BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new CustomException("Booking not found"));
 
-        if (!booking.getUserId().equals(userId)) {
+        if (!booking.getUser().getUserId().equals(userId)) {
             throw new CustomException("You are not allowed to delete this booking");
         }
 

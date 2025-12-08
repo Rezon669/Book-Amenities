@@ -8,21 +8,20 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findByUserIdAndBookingDate(Long userId, LocalDate bookingDate);
+    List<Booking> findByUser_UserIdAndBookingDate(Long userId, LocalDate bookingDate);
 
     List<Booking> findByBookingDateAndAmenityName(LocalDate bookingDate, String amenityName);
 
-    @Query("SELECT b FROM Booking b WHERE b.userId = :userId AND b.bookingDate < :today ORDER BY b.bookingDate DESC")
+    @Query("SELECT b FROM Booking b WHERE b.user.userId = :userId AND b.bookingDate < :today ORDER BY b.bookingDate DESC")
     List<Booking> findPastBookings(@Param("userId") Long userId, @Param("today") LocalDate today);
 
-    @Query("SELECT b FROM Booking b WHERE b.userId = :userId AND b.bookingDate >= :today ORDER BY b.bookingDate ASC")
+    @Query("SELECT b FROM Booking b WHERE b.user.userId = :userId AND b.bookingDate >= :today ORDER BY b.bookingDate ASC")
     List<Booking> findUpcomingBookings(@Param("userId") Long userId, @Param("today") LocalDate today);
 
-    @Query("SELECT COUNT(b) FROM Booking b WHERE b.userId = :userId AND b.amenityName = :amenityName AND YEAR(b.bookingDate) = :year")
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.user.userId = :userId AND b.amenityName = :amenityName AND YEAR(b.bookingDate) = :year")
     int countBookingsForYear(@Param("userId") Long userId,
                              @Param("amenityName") String amenityName,
                              @Param("year") int year);
@@ -39,19 +38,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("currentWeek") int currentWeek,
             @Param("currentYear") int currentYear);
 
-    @Query("""
-    SELECT COUNT(b)
-    FROM Booking b
-    WHERE b.userId = :userId
-      AND b.amenityName = :amenityName
-      AND MONTH(b.bookingDate) = :currentMonth
-      AND YEAR(b.bookingDate) = :currentYear
-""")
-    int countMonthlyBookings(@Param("userId") Long userId,
-                             @Param("amenityName") String amenityName,
-                             @Param("currentMonth") int currentMonth,
-                             @Param("currentYear") int currentYear);
-
+        @Query("""
+        SELECT COUNT(b)
+        FROM Booking b
+        WHERE b.user.userId = :userId
+          AND b.amenityName = :amenityName
+          AND MONTH(b.bookingDate) = :currentMonth
+          AND YEAR(b.bookingDate) = :currentYear
+    """)
+        int countMonthlyBookings(@Param("userId") Long userId,
+                                 @Param("amenityName") String amenityName,
+                                 @Param("currentMonth") int currentMonth,
+                                 @Param("currentYear") int currentYear);
+    
 
 }
 

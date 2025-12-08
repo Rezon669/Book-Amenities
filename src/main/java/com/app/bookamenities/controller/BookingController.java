@@ -41,7 +41,6 @@ public class BookingController {
         bookingService.deleteBooking(bookingId, userId);
         HashMap<String, String> response = new HashMap<>();
         response.put("message", "Booking deleted successfully");
-
         return ResponseEntity.ok(response);
     }
 

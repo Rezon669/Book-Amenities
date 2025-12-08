@@ -8,13 +8,14 @@ import com.app.bookamenities.exception.CustomException;
 import com.app.bookamenities.repository.BlacklistRepository;
 import com.app.bookamenities.repository.UserRepository;
 import com.app.bookamenities.security.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
+@Slf4j
 public class AuthenticationService {
 
     private final UserRepository userRepository;
@@ -25,7 +26,8 @@ public class AuthenticationService {
 
     private final PasswordEncoder passwordEncoder;
 
-    public AuthenticationService(UserRepository userRepository, BlacklistRepository blacklistRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
+    public AuthenticationService(UserRepository userRepository, BlacklistRepository blacklistRepository,
+                                 JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.blacklistRepository = blacklistRepository;
         this.jwtUtil = jwtUtil;
@@ -34,13 +36,16 @@ public class AuthenticationService {
 
     public LoginResponse login(LoginRequest request) {
 
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new CustomException("Invalid username or password"));
+        log.info("Fetching username from DB");
 
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new CustomException("No record found with this username"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException("Invalid username or password");
         }
+
+        log.info("Validation successful, Generating the token");
 
         String token = jwtUtil.generateToken(user.getUsername(), user.getUserId());
 
@@ -48,14 +53,12 @@ public class AuthenticationService {
     }
 
     public void logout(String token) {
+
         BlacklistedToken blacklistedToken = new BlacklistedToken();
         blacklistedToken.setToken(token);
         blacklistedToken.setBlacklistedAt(LocalDateTime.now());
-
+        log.info("logging out, please wait");
         blacklistRepository.save(blacklistedToken);
     }
 
-    public boolean isTokenBlacklisted(String token) {
-        return blacklistRepository.existsByToken(token);
-    }
 }

@@ -17,6 +17,8 @@ public class BookingRequest {
     private LocalTime startTime;
     @JsonFormat(pattern = "HH:mm")
     private LocalTime endTime;
+    private String slot;
+    private String roomNumber;
 }
 
 

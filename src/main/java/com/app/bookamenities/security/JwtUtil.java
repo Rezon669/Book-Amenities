@@ -10,12 +10,12 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private String secret = "oufygohiyhgfidtugbhjpoijhfgc6451ipouyfdctryhujk69875"; // keep in ENV or Secrets Manager
+    private String secret = "oufygohiyhgfidtugbhjpoijhfgc6451ipouyfdctryhujk69875";
 
     public String generateToken(String username, Long userId) {
         return Jwts.builder()
                 .setSubject(username)
-                .claim("userid", userId)
+                .claim("userId", userId)
                 .setIssuer("Book-Amenities")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 60 * 60 * 1000))

@@ -1,6 +1,7 @@
 package com.app.bookamenities.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -24,13 +25,20 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookingId;
 
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId", nullable = false)
+    @JsonIgnore
+    private User user;
 
     @NotBlank
     private String amenityName;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate bookingDate;
+
+    private String slot;
+
+    private String roomNumber;
 
     @JsonFormat(pattern = "HH:mm")
     private LocalTime startTime;

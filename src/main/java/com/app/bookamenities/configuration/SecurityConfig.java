@@ -43,8 +43,8 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .authorizeHttpRequests(req -> req
                         .requestMatchers("/", "/index.html", "/assets/**", "/static/**", "/images/**").permitAll()
-                        .requestMatchers("/book-amenities/login", "/book-amenities/user").permitAll()
-                        .requestMatchers("/book-amenities/**").authenticated())
+                        .requestMatchers("/api/book-amenities/login", "/api/book-amenities/user").permitAll()
+                        .requestMatchers("/api/book-amenities/**").authenticated())
 //                .exceptionHandling(ex -> ex
 //                        .accessDeniedHandler(customAccessDeniedHandler())
 //                        .authenticationEntryPoint(customAuthenticationEntryPoint()))

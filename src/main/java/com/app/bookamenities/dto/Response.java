@@ -6,6 +6,5 @@ import lombok.Data;
 public class Response {
 
     private int statuscode;
-
     private String message;
 }

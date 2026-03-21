@@ -43,34 +43,13 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .authorizeHttpRequests(req -> req
                         .requestMatchers("/", "/index.html", "/assets/**", "/static/**", "/images/**").permitAll()
-                        .requestMatchers("/book-amenities/login", "/book-amenities/user").permitAll()
-                        .requestMatchers("/book-amenities/**").authenticated())
-//                .exceptionHandling(ex -> ex
-//                        .accessDeniedHandler(customAccessDeniedHandler())
-//                        .authenticationEntryPoint(customAuthenticationEntryPoint()))
+                        .requestMatchers("/api/book-amenities/login", "/api/book-amenities/user").permitAll()
+                        .requestMatchers("/api/book-amenities/**").authenticated())
                 .httpBasic(basic -> basic.disable())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
-//    @Bean
-//    public AuthenticationEntryPoint customAuthenticationEntryPoint() {
-//        return (req, res, ex) -> {
-//            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//            res.setContentType("application/json");
-//            res.getWriter().write("{\"error\": \"401 - Unauthorized: Please login again\"}");
-//        };
-//    }
-//
-//    @Bean
-//    public AccessDeniedHandler customAccessDeniedHandler() {
-//        return (req, res, ex) -> {
-//            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
-//            res.setContentType("application/json");
-//            res.getWriter().write("{\"error\": \"403 - No Access: Please login again\"}");
-//        };
-//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

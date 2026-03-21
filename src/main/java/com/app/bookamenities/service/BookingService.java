@@ -27,12 +27,10 @@ public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
-    private final SnsClient snsClient;
 
-    BookingService(BookingRepository bookingRepository, UserRepository userRepository, SnsClient snsClient){
+    BookingService(BookingRepository bookingRepository, UserRepository userRepository){
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
-        this.snsClient = snsClient;
     }
     public Booking bookSlot(BookingRequest request) {
 
@@ -51,23 +49,18 @@ public class BookingService {
         booking.setBookingDate(request.getBookingDate());
         booking.setCreatedDate(LocalDateTime.now());
 
-//        User user = userRepository.findById(request.getUserId())
-//                .orElseThrow(() -> new CustomException("User not found"));
-
         log.info("Creating a booking slot");
 
         Booking savedBooking = bookingRepository.save(booking);
 
-        String message =
-                "Hi " + user.getFirstName()+",\n" +
-                        "Booking Confirmed!\n" +
-                        "Booking ID: " + savedBooking.getBookingId() + "\n" +
-                        "Amenity: " + request.getAmenityName() + "\n" +
-                        "Date: " + request.getBookingDate() + "\n" +
-                        "From: " + request.getStartTime() + "\n" +
-                        "To: " + request.getEndTime();
-
-     //   sendSms(user.getMobile(), message);
+//        String message =
+//                "Hi " + user.getFirstName()+",\n" +
+//                        "Booking Confirmed!\n" +
+//                        "Booking ID: " + savedBooking.getBookingId() + "\n" +
+//                        "Amenity: " + request.getAmenityName() + "\n" +
+//                        "Date: " + request.getBookingDate() + "\n" +
+//                        "From: " + request.getStartTime() + "\n" +
+//                        "To: " + request.getEndTime();
 
         return savedBooking;
     }
@@ -220,8 +213,6 @@ public class BookingService {
             }
         }
 
-
-
         log.info("Booking details validation completed");
     }
 
@@ -232,9 +223,9 @@ public class BookingService {
                 .message(message)
                 .build();
 
-        PublishResponse response = snsClient.publish(request);
+       // PublishResponse response = snsClient.publish(request);
 
-        System.out.println("Message ID: " + response.messageId());
+      //  System.out.println("Message ID: " + response.messageId());
     }
 
     public List<Booking> getPastBookings(Long userId) {
@@ -272,7 +263,6 @@ public class BookingService {
         log.info("Deleting booking");
 
         bookingRepository.delete(booking);
-
     }
 
     public Booking updateBooking(Long bookingId, BookingRequest request) {
@@ -294,7 +284,5 @@ public class BookingService {
 
         return bookingRepository.save(booking);
     }
-
-
 
 }

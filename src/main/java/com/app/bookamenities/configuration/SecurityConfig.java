@@ -31,8 +31,8 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     var config = new org.springframework.web.cors.CorsConfiguration();
-                    //config.setAllowedOrigins(List.of("http://localhost:5173"));
-                    config.setAllowedOrigins(Collections.singletonList("*"));
+                    config.setAllowedOrigins(List.of("http://localhost:5173"));
+                    //config.setAllowedOrigins(Collections.singletonList("*"));
                     config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
                     config.setAllowedHeaders(List.of("*"));
                     config.setAllowCredentials(true);
@@ -43,7 +43,8 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .authorizeHttpRequests(req -> req
                         .requestMatchers("/", "/index.html", "/assets/**", "/static/**", "/images/**").permitAll()
-                        .requestMatchers("/api/book-amenities/login", "/api/book-amenities/user").permitAll()
+                        .requestMatchers("/api/book-amenities/login", "/api/book-amenities/user", "/api/book-amenities/chat-client/reload",
+                                "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/book-amenities/**").authenticated())
                 .httpBasic(basic -> basic.disable())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

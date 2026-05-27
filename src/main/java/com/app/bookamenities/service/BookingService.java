@@ -8,18 +8,12 @@ import com.app.bookamenities.repository.BookingRepository;
 import com.app.bookamenities.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.services.sns.SnsClient;
-import software.amazon.awssdk.services.sns.model.PublishRequest;
-import software.amazon.awssdk.services.sns.model.PublishResponse;
-
-
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoField;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -218,10 +212,10 @@ public class BookingService {
 
     public void sendSms(String phoneNumber, String message) {
 
-        PublishRequest request = PublishRequest.builder()
-                .phoneNumber( "+91" + phoneNumber)
-                .message(message)
-                .build();
+//        PublishRequest request = PublishRequest.builder()
+//                .phoneNumber( "+91" + phoneNumber)
+//                .message(message)
+//                .build();
 
        // PublishResponse response = snsClient.publish(request);
 

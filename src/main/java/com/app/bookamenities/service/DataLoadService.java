@@ -9,7 +9,9 @@ import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -17,38 +19,47 @@ import java.util.List;
 public class DataLoadService {
 
     private final VectorStore vectorStore;
+    private final JdbcTemplate jdbcTemplate;
 
-    public DataLoadService(VectorStore vectorStore) {
+    public DataLoadService(VectorStore vectorStore, JdbcTemplate jdbcTemplate) {
         this.vectorStore = vectorStore;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
-    @PostConstruct
+    //@PostConstruct
     public void loadData() {
 
         try {
 
-                ClassPathResource resource =
-                        new ClassPathResource("docs/book_amenities_user_guide.pdf");
+            log.info("Deleting old RAG data...");
 
-                log.info("Processing file: {}", resource.getFilename());
+            // Delete existing vectors
+            jdbcTemplate.execute("TRUNCATE TABLE vector_store");
 
-                List<Document> docs = getDocsFromPdf(resource);
+            log.info("Old RAG data deleted successfully");
 
-                log.info("Extracted {} documents from file: {}",
-                        docs.size(),
-                        resource.getFilename());
+            ClassPathResource resource =
+                    new ClassPathResource("docs/book_amenities_user_guide.pdf");
 
-                List<Document> chunks = splitDocuments(docs);
+            log.info("Processing file: {}", resource.getFilename());
 
-                log.info("Split documents into {} chunks for file: {}",
-                        chunks.size(),
-                        resource.getFilename());
+            List<Document> docs = getDocsFromPdf(resource);
 
-                vectorStore.add(chunks);
+            log.info("Extracted {} documents from file: {}",
+                    docs.size(),
+                    resource.getFilename());
 
-                log.info("Added {} chunks to vector store for file: {}",
-                        chunks.size(),
-                        resource.getFilename());
+            List<Document> chunks = splitDocuments(docs);
+
+            log.info("Split documents into {} chunks for file: {}",
+                    chunks.size(),
+                    resource.getFilename());
+
+            vectorStore.add(chunks);
+
+            log.info("Added {} chunks to vector store for file: {}",
+                    chunks.size(),
+                    resource.getFilename());
 
         } catch (Exception e) {
 

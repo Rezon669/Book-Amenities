@@ -235,7 +235,7 @@ public class BookingService {
 
     public void deleteBooking(Long bookingId, Long userId) {
 
-        log.info("Verifying booking id");
+        log.info("Verifying booking id : {}", bookingId);
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new CustomException("Booking not found"));
 
@@ -254,7 +254,7 @@ public class BookingService {
                 throw new CustomException("You cannot delete a booking that already started");
             }
         }
-        log.info("Deleting booking");
+        log.info("Deleting booking id {}", bookingId);
 
         bookingRepository.delete(booking);
     }
@@ -268,7 +268,6 @@ public class BookingService {
 
         validateBookingDetails(request);
 
-        // Apply updates
         booking.setAmenityName(request.getAmenityName());
         booking.setStartTime(request.getStartTime());
         booking.setEndTime(request.getEndTime());

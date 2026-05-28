@@ -11,4 +11,8 @@ public class CustomChatRequest {
 
     @NotBlank(message = "Query should not be blank")
     private String query;
+
+    private String bookingId;
+
+    private String conversationId;
 }
